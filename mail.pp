@@ -81,5 +81,16 @@ node default {
       ensure => present;
   }
 
+  group { 'mail':
+    ensure => 'present',
+    gid    => '500',
+  }->
+  user { 'test':
+    ensure           => 'present',
+    home             => '/home/test',
+    password         => 'password',
+    shell            => '/bin/bash',
+    groups           => 'mail',
+  }
 
 }
