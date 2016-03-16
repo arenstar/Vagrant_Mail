@@ -9,6 +9,7 @@ node default {
       ensure => present,
       owner  => 'root',
       group  => 'root',
+      notify => Service['opensmtpd'],
       source => "file:///vagrant/opensmtpd/smtpd.conf";
     '/etc/maildomains':
       ensure  => present,
@@ -33,7 +34,13 @@ node default {
       group  => 'root',
       mode   => '0600',
       source => "file:///vagrant/pki/arenstar_CA_cert.pem";
+  }->
+  service {
+    'opensmtpd':  
+      ensure => running,
+      enable => true,
   }
+ 
 
   package { 
     'dovecot-imapd':
@@ -48,12 +55,18 @@ node default {
       ensure => present,
       owner  => 'root',
       group  => 'root',
+      notify => Service['dovecot'],
       source => "file:///vagrant/dovecot/dovecot.conf";
     '/usr/bin/sa-learn-pipe.sh':
       ensure => present,
       owner  => 'root',
       group  => 'root',
       source => "file:///vagrant/dovecot/sa-learn-pipe.sh";
+  }->
+  service {
+    'dovecot':  
+      ensure => running,
+      enable => true,
   }
 
   package { 
@@ -66,7 +79,13 @@ node default {
       owner  => 'root',
       group  => 'root',
       source => "file:///vagrant/spamassassin/default";
+  }->
+  service {
+    'spampd':  
+      ensure => running,
+      enable => true,
   }
+
 
   file {
     ['/etc/skel/Maildir','/etc/skel/Maildir/cur','/etc/skel/Maildir/new','/etc/skel/Maildir/tmp']:
