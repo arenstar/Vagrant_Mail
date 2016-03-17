@@ -16,29 +16,11 @@ node default {
       owner   => 'root',
       group   => 'root',
       content => "arenstar.net\n";
-    '/etc/pki/wildcard_arenstar.net.key':
-      ensure => present,
-      owner  => 'root',
-      group  => 'root',
-      mode   => '0600',
-      source => "file:///vagrant/pki/wildcard_arenstar.net.key";
-    '/etc/pki/wildcard_arenstar.net.pem':
-      ensure => present,
-      owner  => 'root',
-      group  => 'root',
-      mode   => '0600',
-      source => "file:///vagrant/pki/wildcard_arenstar.net.pem";
-    '/etc/pki/arenstar_CA_cert.pem':
-      ensure => present,
-      owner  => 'root',
-      group  => 'root',
-      mode   => '0600',
-      source => "file:///vagrant/pki/arenstar_CA_cert.pem";
   }->
   service {
-    'opensmtpd':  
+    'opensmtpd':
       ensure => running,
-      enable => true,
+      enable => true;
   }
  
 
@@ -89,15 +71,35 @@ node default {
 
   file {
     ['/etc/skel/Maildir','/etc/skel/Maildir/cur','/etc/skel/Maildir/new','/etc/skel/Maildir/tmp']:
-      ensure => present;
+      ensure => directory;
     ['/etc/skel/Maildir/.Drafts','/etc/skel/Maildir/.Drafts/cur','/etc/skel/Maildir/.Drafts/new','/etc/skel/Maildir/.Drafts/tmp']:
-      ensure => present;
+      ensure => directory;
     ['/etc/skel/Maildir/.Sent','/etc/skel/Maildir/.Sent/cur','/etc/skel/Maildir/.Sent/new','/etc/skel/Maildir/.Sent/tmp']:
-      ensure => present;
+      ensure => directory;
     ['/etc/skel/Maildir/.Trash','/etc/skel/Maildir/.Trash/cur','/etc/skel/Maildir/.Trash/new','/etc/skel/Maildir/.Trash/tmp']:
-      ensure => present;
+      ensure => directory;
     ['/etc/skel/Maildir/.Templates','/etc/skel/Maildir/.Templates/cur','/etc/skel/Maildir/.Templates/new','/etc/skel/Maildir/.Templates/tmp']:
-      ensure => present;
+      ensure => directory;
+    '/etc/pki':
+      ensure => directory;
+    '/etc/pki/wildcard_arenstar.net.key':
+      ensure => present,
+      owner  => 'root',
+      group  => 'root',
+      mode   => '0600',
+      source => "file:///vagrant/pki/wildcard_arenstar.net.key";
+    '/etc/pki/wildcard_arenstar.net.pem':
+      ensure => present,
+      owner  => 'root',
+      group  => 'root',
+      mode   => '0600',
+      source => "file:///vagrant/pki/wildcard_arenstar.net.pem";
+    '/etc/pki/arenstar_CA_cert.pem':
+      ensure => present,
+      owner  => 'root',
+      group  => 'root',
+      mode   => '0600',
+      source => "file:///vagrant/pki/arenstar_CA_cert.pem";
   }
 
   group { 'mail':
@@ -107,7 +109,8 @@ node default {
   user { 'test':
     ensure           => 'present',
     home             => '/home/test',
-    password         => 'password',
+    managehome       => true,
+    password         => '$6$STFoC3Nx$0YurTwTvQG3f2otaFXGxAIo3DaVlgxJhbwh5CGAdQLV9Bh/LrE2mvvAHIZJevCxlWm2LNQVNprsHp5RZEYUB2/',
     shell            => '/bin/bash',
     groups           => 'mail',
   }
