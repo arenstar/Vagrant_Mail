@@ -46,11 +46,13 @@ node default {
       owner  => 'root',
       group  => 'root',
       source => "file:///vagrant/dovecot/sa-learn-pipe.sh";
-  }->
+  }
   service {
-    'dovecot':  
-      ensure => running,
-      enable => true,
+    'dovecot':
+      enable    => true,
+      ensure    => running,
+      hasstatus => true,
+      require   => File['/etc/dovecot/dovecot.conf'];
   }
 
   package { 
