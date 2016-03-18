@@ -16,14 +16,16 @@ node default {
       owner   => 'root',
       group   => 'root',
       content => "arenstar.net\n";
-  }->
+  }
+
   service {
     'opensmtpd':
-      ensure => running,
-      enable => true;
+      ensure    => running,
+      enable    => true,
+      hasstatus => false,
+      require   => File['/etc/smtpd.conf'];
   }
  
-
   package { 
     'dovecot-imapd':
       ensure => 'latest';
