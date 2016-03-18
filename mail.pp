@@ -115,4 +115,54 @@ node default {
     groups           => 'mail',
   }
 
+
+  class { 'fail2ban': }
+
+  # basic firewall declarations
+  class { 'firewall': }
+  firewall { '000 accept all icmp':
+    proto   => 'icmp',
+    action  => 'accept',
+  }->
+  firewall { '001 accept all to lo interface':
+    proto   => 'all',
+    iniface => 'lo',
+    action  => 'accept',
+  }->
+  firewall { '003 accept related established rules':
+    proto   => 'all',
+    state   => ['RELATED', 'ESTABLISHED'],
+    action  => 'accept',
+  }->
+  firewall { '990 Allow INPUT SMTP':
+    chain   => 'INPUT',
+    dport   => ['25','587'],
+    proto   => 'tcp',
+    action  => 'accept',
+  }->
+  firewall { '990 Allow INPUT IMAP':
+    chain   => 'INPUT',
+    dport   => ['143','993'],
+    proto   => 'tcp',
+    action  => 'accept',
+  }->
+  firewall { '990 Allow INPUT SSH EXTERNAL':
+    chain   => 'INPUT',
+    dport    => '22',
+    proto   => 'tcp',
+    action  => 'accept',
+  }->
+  firewall { '995 Allow ESTABLISHED INPUT SSH':
+    chain   => 'INPUT',
+    dport   => '22',
+    proto   => 'tcp',
+    state   => 'ESTABLISHED',
+    action  => 'accept',
+  }->
+  firewall { '996 drop all':
+    proto   => 'all',
+    action  => 'drop',
+    before  => undef,
+  }
+
 }

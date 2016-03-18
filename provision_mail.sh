@@ -9,3 +9,5 @@ sed -i '/templatedir/d' /etc/puppet/puppet.conf
 puppet module install garethr-docker
 puppet module install jproyo-dovecot
 puppet module install wyrie-spamassassin
+puppet module install puppetlabs-firewall
+puppet module install dhoppe-fail2ban
