@@ -104,7 +104,6 @@ node default {
 
   group { 'mail':
     ensure => 'present',
-    gid    => '500',
   }->
   user { 'test':
     ensure           => 'present',
