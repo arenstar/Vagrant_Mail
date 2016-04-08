@@ -79,6 +79,14 @@ node default {
       enable => true,
   }
 
+  package{ 
+    'python-pam':
+      ensure => present;
+    'python-pampy':
+      ensure => present;
+    'libpam-python':
+      ensure => present;
+  }->
   file { 
     '/lib/security/emailuser.py':
       ensure => present,
