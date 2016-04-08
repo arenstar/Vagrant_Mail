@@ -1,7 +1,7 @@
 import getpass, imaplib
 
-M = imaplib.IMAP4_SSL('localhost')
-M.login('test', 'password')
+M = imaplib.IMAP4_SSL('127.0.0.1')
+M.login('test@arenstar.net', 'password')
 M.select()
 typ, data = M.search(None, 'ALL')
 for num in data[0].split():

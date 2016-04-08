@@ -1,20 +1,43 @@
-#!/usr/bin/python
+from smtplib import SMTP
+import datetime
 
-import smtplib
+debuglevel = 0
 
-sender = 'from@example.com'
-receivers = ['test@arenstar.net']
+smtp = SMTP()
+smtp.set_debuglevel(debuglevel)
+smtp.connect('localhost', 25)
+smtp.ehlo()
 
-message = """From: From Person <from@example.com>
-To: To Person <test@arenstar.net>
-Subject: SMTP e-mail test
+from_addr = "John Doe <john@doe.net>"
+to_addr = "test@arenstar.net"
 
-This is a test e-mail message.
-"""
+subj = "hello"
+date = datetime.datetime.now().strftime( "%d/%m/%Y %H:%M" )
 
-try:
-   smtpObj = smtplib.SMTP('localhost')
-   smtpObj.sendmail(sender, receivers, message)         
-   print "Successfully sent email"
-except SMTPException:
-   print "Error: unable to send email"
+message_text = "Hello\nThis is a mail from your server\n\nBye\n"
+
+msg = "From: %s\nTo: %s\nSubject: %s\nDate: %s\n\n%s" % ( from_addr, to_addr, subj, date, message_text )
+
+smtp.sendmail(from_addr, to_addr, msg)
+smtp.quit()
+
+smtp = SMTP()
+smtp.set_debuglevel(debuglevel)
+smtp.connect('localhost', 25)
+smtp.ehlo()
+smtp.starttls()
+smtp.ehlo
+smtp.login('test@arenstar.net', 'password')
+
+from_addr = "John Doe <john@doe.net>"
+to_addr = "test@arenstar.net"
+
+subj = "hello"
+date = datetime.datetime.now().strftime( "%d/%m/%Y %H:%M" )
+
+message_text = "Hello\nThis is a mail from your server\n\nBye\n"
+
+msg = "From: %s\nTo: %s\nSubject: %s\nDate: %s\n\n%s" % ( from_addr, to_addr, subj, date, message_text )
+
+smtp.sendmail(from_addr, to_addr, msg)
+smtp.quit()
