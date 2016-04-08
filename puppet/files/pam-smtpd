@@ -1,0 +1,4 @@
+#%PAM-1.0
+auth       requisite    pam_python.so    emailuser.py system-auth
+account    requisite    pam_python.so    emailuser.py system-auth
+session    requisite    pam_python.so    emailuser.py system-auth

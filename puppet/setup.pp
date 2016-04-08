@@ -10,23 +10,30 @@ node default {
       owner  => 'root',
       group  => 'root',
       notify => Service['opensmtpd'],
-      source => "file:///vagrant/opensmtpd/smtpd.conf";
+      source => "file:///vagrant/puppet/opensmtpd/smtpd.conf";
     '/etc/maildomains':
       ensure  => present,
       owner   => 'root',
       group   => 'root',
       content => "arenstar.net\n";
-  }
-
+  }->
   service {
     'opensmtpd':
       ensure    => running,
       enable    => true,
       hasstatus => false,
+      pattern   => 'smtpd',
       require   => File['/etc/smtpd.conf'];
   }
+
+  mailalias {
+    "root":
+      ensure    => present,
+      recipient => "test",
+      provider  => augeas,
+  }
  
-  package { 
+  package {
     'dovecot-imapd':
       ensure => 'latest';
     'dovecot-antispam':
@@ -40,12 +47,12 @@ node default {
       owner  => 'root',
       group  => 'root',
       notify => Service['dovecot'],
-      source => "file:///vagrant/dovecot/dovecot.conf";
+      source => "file:///vagrant/puppet/dovecot/dovecot.conf";
     '/usr/bin/sa-learn-pipe.sh':
       ensure => present,
       owner  => 'root',
       group  => 'root',
-      source => "file:///vagrant/dovecot/sa-learn-pipe.sh";
+      source => "file:///vagrant/puppet/dovecot/sa-learn-pipe.sh";
   }
   service {
     'dovecot':
@@ -55,7 +62,7 @@ node default {
       require   => File['/etc/dovecot/dovecot.conf'];
   }
 
-  package { 
+  package {
     'spampd':
       ensure => 'latest';
   }->
@@ -64,14 +71,31 @@ node default {
       ensure => present,
       owner  => 'root',
       group  => 'root',
-      source => "file:///vagrant/spamassassin/default";
+      source => "file:///vagrant/puppet/spamassassin/default";
   }->
   service {
-    'spampd':  
+    'spampd':
       ensure => running,
       enable => true,
   }
 
+  file { 
+    '/lib/security/emailuser.py':
+      ensure => present,
+      owner  => 'root',
+      group  => 'root',
+      source => "file:///vagrant/puppet/files/emailuser.py";
+    '/etc/pam.d/smtpd':
+      ensure => present,
+      owner  => 'root',
+      group  => 'root',
+      source => "file:///vagrant/puppet/files/pam-smtpd";
+    '/etc/pam.d/dovecot':
+      ensure => present,
+      owner  => 'root',
+      group  => 'root',
+      source => "file:///vagrant/puppet/files/pam-smtpd";
+  }
 
   file {
     ['/etc/skel/Maildir','/etc/skel/Maildir/cur','/etc/skel/Maildir/new','/etc/skel/Maildir/tmp']:
@@ -137,6 +161,12 @@ node default {
     state   => ['RELATED', 'ESTABLISHED'],
     action  => 'accept',
   }->
+  firewall { '990 Allow INPUT HTTP':
+    chain   => 'INPUT',
+    dport   => ['80','443'],
+    proto   => 'tcp',
+    action  => 'accept',
+  }->
   firewall { '990 Allow INPUT SMTP':
     chain   => 'INPUT',
     dport   => ['25','587'],
@@ -167,5 +197,4 @@ node default {
     action  => 'drop',
     before  => undef,
   }
-
 }
