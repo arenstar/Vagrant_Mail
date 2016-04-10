@@ -43,6 +43,9 @@ def pam_sm_authenticate(pamh, flags, argv):
   username = get_username(pamh)
   password = get_password(pamh)
 
+  #auth_log(username)
+  #auth_log(password)
+
   if pam.authenticate(username,password, service=pam_service):
     return pamh.PAM_SUCCESS
   return pamh.PAM_AUTH_ERR
@@ -54,7 +57,7 @@ def pam_sm_acct_mgmt(pamh, flags, argv):
   username = get_username(pamh)
   try:
     pwent = pwd.getpwnam(username)
-    auth_log(str(pwent))
+    #auth_log(str(pwent))
   except KeyError:
     retval = pamh.PAM_USER_UNKNOWN
     msg_style = pamh.PAM_ERROR_MSG
