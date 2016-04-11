@@ -16,6 +16,11 @@ node default {
       owner   => 'root',
       group   => 'root',
       content => "arenstar.net\n";
+    '/etc/blacklist-recipients':
+      ensure  => present,
+      owner   => 'root',
+      group   => 'root',
+      content => "\n";
   }->
   service {
     'opensmtpd':
@@ -150,7 +155,6 @@ node default {
     groups           => 'mail',
   }
 
-
   class { 'fail2ban': }
 
   # basic firewall declarations
@@ -167,12 +171,6 @@ node default {
   firewall { '003 accept related established rules':
     proto   => 'all',
     state   => ['RELATED', 'ESTABLISHED'],
-    action  => 'accept',
-  }->
-  firewall { '990 Allow INPUT HTTP':
-    chain   => 'INPUT',
-    dport   => ['80','443'],
-    proto   => 'tcp',
     action  => 'accept',
   }->
   firewall { '990 Allow INPUT SMTP':

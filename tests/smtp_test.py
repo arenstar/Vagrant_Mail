@@ -8,10 +8,10 @@ smtp.set_debuglevel(debuglevel)
 smtp.connect('localhost', 25)
 smtp.ehlo()
 
-from_addr = "John Doe <john@doe.net>"
+from_addr = "Contact <contact@davidarena.net>"
 to_addr = "test@arenstar.net"
 
-subj = "hello"
+subj = "TEST no AUTH port 25"
 date = datetime.datetime.now().strftime( "%d/%m/%Y %H:%M" )
 
 message_text = "Hello\nThis is a mail from your server\n\nBye\n"
@@ -29,10 +29,10 @@ smtp.starttls()
 smtp.ehlo
 smtp.login('test@arenstar.net', 'password')
 
-from_addr = "John Doe <john@doe.net>"
+from_addr = "Contact <contact@davidarena.net>"
 to_addr = "test@arenstar.net"
 
-subj = "hello"
+subj = "TEST STARTTLS AUTH port 25"
 date = datetime.datetime.now().strftime( "%d/%m/%Y %H:%M" )
 
 message_text = "Hello\nThis is a mail from your server\n\nBye\n"
