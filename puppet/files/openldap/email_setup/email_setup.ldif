@@ -1,0 +1,17 @@
+dn: ou=domains,dc=arenstar,dc=net
+ou: domains
+objectClass: organizationalUnit
+
+dn: dc=arenstar.net,ou=domains,dc=arenstar,dc=net
+dc: arenstar.net
+objectClass: domain
+
+dn: ou=aliases,dc=arenstar,dc=net
+ou: aliases
+objectClass: organizationalUnit
+
+dn: cn=stuff@arenstar.net,ou=aliases,dc=arenstar,dc=net
+objectclass: alias
+objectclass: extensibleObject
+cn: stuff@arenstar.net
+aliasedObjectName: uid=contact,ou=people,dc=arenstar,dc=net

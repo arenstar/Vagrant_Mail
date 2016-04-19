@@ -1,0 +1,14 @@
+uris = ldap://ldap.arenstar.net
+dn = cn=admin,dc=arenstar,dc=net
+dnpass = password
+tls = no
+ldap_version = 3
+base = dc=arenstar,dc=net
+scope = subtree
+###user_attrs = homeDirectory=home,uidNumber=uid,gidNumber=gid
+user_attrs = homeDirectory=home
+user_filter = (uid=%u)
+pass_attrs = uid=user,userPassword=password
+pass_filter = (uid=%u)
+#debug_level = 0
+default_pass_scheme = CRYPT
