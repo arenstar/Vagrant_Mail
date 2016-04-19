@@ -1,5 +1,15 @@
 node default {
 
+  anchor { 'begin': } ->
+    class { 'docker':
+        ensure         => 'present',
+        service_enable => 'true',
+        service_state  => 'running',
+    }->
+    class  { 'firewall_setup': } ->
+    class  { 'fail2ban': } ->
+  anchor { 'end': }
+
   #package {
   #  'spampd':
   #    ensure => 'latest';
@@ -17,11 +27,6 @@ node default {
   #    enable => true,
   #}
 
-
-  include firewall_setup
-  include docker
-
-  class { 'fail2ban': }
 
   docker::run { 'znc':
     image              => 'jimeh/znc',
@@ -44,8 +49,8 @@ node default {
        '/etc/mailname:/etc/mailname:ro',
        '/vagrant/puppet/files/opensmtpd/smtpd.conf:/etc/smtpd.conf:ro',
        '/vagrant/puppet/files/opensmtpd/smtpd-ldap.conf:/etc/smtpd-ldap.conf:ro',
-       '/etc/pki/wildcard_arenstar.net.pem:/etc/wildcard_arenstar.net.pem:ro',
-       '/etc/pki/wildcard_arenstar.net.key:/etc/wildcard_arenstar.net.key:ro',
+       '/etc/ssl/wildcard_arenstar.net.pem:/etc/wildcard_arenstar.net.pem:ro',
+       '/etc/ssl/wildcard_arenstar.net.key:/etc/wildcard_arenstar.net.key:ro',
     ],
     restart_service    => true,
   }
@@ -90,8 +95,8 @@ node default {
        '/vagrant/puppet/files/dovecot/dovecot.conf:/etc/dovecot/dovecot.conf:ro',
        '/vagrant/puppet/files/dovecot/dovecot-ldap.conf.ext:/etc/dovecot/dovecot-ldap.conf.ext:ro',
        '/vagrant/puppet/files/dovecot/sa-learn-pipe.sh:/usr/bin/sa-learn-pipe.sh:ro',
-       '/etc/pki/wildcard_arenstar.net.pem:/etc/pki/ssl_cert.pem:ro',
-       '/etc/pki/wildcard_arenstar.net.key:/etc/pki/ssl_key.pem:ro',
+       '/etc/ssl/wildcard_arenstar.net.pem:/etc/pki/ssl_cert.pem:ro',
+       '/etc/ssl/wildcard_arenstar.net.key:/etc/pki/ssl_key.pem:ro',
     ],
   }
 
@@ -126,20 +131,31 @@ node default {
     unless  => "/usr/bin/ldapsearch -x -D 'cn=admin,dc=arenstar,dc=net' -w password -b \"cn=stuff@arenstar.net,ou=aliases,dc=arenstar,dc=net\" \"cn=stuff@arenstar.net\"",
   }
 
+  package {
+    'exim4': 
+      ensure => absent;
+    'exim4-base':
+      ensure => absent;
+    'exim4-config':
+      ensure => absent;
+    'exim4-daemon-light':
+      ensure => absent;
+  }
+
   file {
-    '/etc/pki/wildcard_arenstar.net.key':
+    '/etc/ssl/wildcard_arenstar.net.key':
       ensure => present,
       owner  => 'root',
       group  => 'root',
       mode   => '0600',
       source => "file:///vagrant/pki/wildcard_arenstar.net.key";
-    '/etc/pki/wildcard_arenstar.net.pem':
+    '/etc/ssl/wildcard_arenstar.net.pem':
       ensure => present,
       owner  => 'root',
       group  => 'root',
       mode   => '0600',
       source => "file:///vagrant/pki/wildcard_arenstar.net.pem";
-    '/etc/pki/arenstar_CA_cert.pem':
+    '/etc/ssl/arenstar_CA_cert.pem':
       ensure => present,
       owner  => 'root',
       group  => 'root',
