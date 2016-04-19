@@ -1,0 +1,23 @@
+dn: ou=people,dc=arenstar,dc=net
+ou: people
+objectClass: top
+objectClass: organizationalUnit
+description: Users
+
+dn: uid=test,ou=people,dc=arenstar,dc=net
+objectClass: top
+objectClass: person
+objectClass: inetorgperson
+objectClass: posixAccount
+objectClass: ldapPublicKey
+objectClass: organizationalPerson
+uid: test
+cn: test
+sn: test
+sshPublicKey: ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAgEAzK1EBdVm+4AtptZTJG6rn6soxsoKLjFnw8+DMl6OELGWQ8I76ScPbGnO2X3+2X/6/lUMkqeL5MgFpNKFaTnh6lsWQ1ozodP6GMEuD2iJL6ue62mvjFmmPrBegqCksSLVl/4+goIX9NFePBy+tJWBKq2TSFW4g3Xixmy6o0K311hH7i7nzwmBhBb3nN+5PlS6y/6OJYjy7Q25B27NL+Gz+qs+7q5pGxxqz4+/L2VHsDyh2b35dq1UEbuDr8S5JPDv9+6nKAjau66jsrnoFrtkuQlnBy3erwAIof2H6LLMoGhtblrI+Pz4FDDlranFy8FbJCXL4i0UlzYReWd0oOybwxtqUAMQsjB/la2WZ3BadC4/hpBZWWCwoNkEbjEV4dtpp+Gc3Xpo9UdAuDUPLbM1XCFBYA1qHALlgoEwseT//LnJcbRS8QpFCieYs5ZV6mFqhPNwqrsFkdgFy3VLbSlVG7sLo28Sncnr3wnR8Zz09xIU8U1WjmdFiIDBGNMK6KH6M8xSqr8T5+lDAw0HRev5a9EryEzNfDTUhtrp70skEfOWLJnl0iQ4FFebvj993ulfxJ0Fu/b+VhxZb92SG3fS20kHz/aK26fATRsWUZ6/q2Y9WI+TdZwhBHaQe5kctWrcHPYVm/KDMOUEkca0AGL2KRT+sr4G8LI/F/pr8CgmXZE=
+loginShell: /bin/bash
+homeDirectory: /home/test
+uidNumber: 10000
+gidNumber: 10000
+userPassword: {SSHA}hV26Ys344gh1y/hOh9qJqSNjOoU+b7t4
+mail: test@arenstar.net

@@ -37,7 +37,7 @@ node default {
   }
 
   docker::image { 'arenstar/opensmtpd':
-    docker_dir => '/vagrant/opensmtpd'
+    docker_dir => '/vagrant/docker/opensmtpd'
   }->
   docker::run { 'opensmtpd':
     image              => 'arenstar/opensmtpd',
@@ -83,7 +83,7 @@ node default {
   }
 
   docker::image { 'arenstar/dovecot':
-    docker_dir => '/vagrant/dovecot'
+    docker_dir => '/vagrant/docker/dovecot'
   }->
   docker::run { 'dovecot':
     image              => 'arenstar/dovecot',
