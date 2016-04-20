@@ -25,7 +25,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   config.vm.define "mail", primary: true, autostart: true do |server|
-    server.vm.box = "ubuntu/trusty64"
+    server.vm.box = "debian/jessie64"
     server.vm.hostname = 'mail.arenstar.net'
     server.vm.network "forwarded_port", guest: 80, host: 80, auto_correct: true
     server.vm.network "forwarded_port", guest: 443, host: 443, auto_correct: true
