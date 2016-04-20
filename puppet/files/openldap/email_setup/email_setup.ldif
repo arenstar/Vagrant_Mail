@@ -10,8 +10,18 @@ dn: ou=aliases,dc=arenstar,dc=net
 ou: aliases
 objectClass: organizationalUnit
 
+dn: cn=contact@arenstar.net,ou=aliases,dc=arenstar,dc=net
+rfc822MailMember: contact
+cn: contact@arenstar.net
+objectClass: nisMailAlias
+
 dn: cn=stuff@arenstar.net,ou=aliases,dc=arenstar,dc=net
-objectclass: alias
-objectclass: extensibleObject
+rfc822MailMember: contact@arenstar.net
 cn: stuff@arenstar.net
-aliasedObjectName: uid=contact,ou=people,dc=arenstar,dc=net
+cn: daemon
+cn: www
+cn: abuse
+cn: security
+cn: root
+cn: postmaster
+objectClass: nisMailAlias
