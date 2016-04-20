@@ -1,45 +1,29 @@
 node default {
+  anchor { 'begin': } ->
+    class { 'docker':
+        ensure         => 'present',
+        service_enable => 'true',
+        service_state  => 'running',
+        dns            => ["S{ipaddress_docker0}",'8.8.8.8'],
+        dns_search     => 'services.consul',
+    }->
+    class  { 'firewall_setup': } ->
+    class  { 'configure': } ->
+    class  { 'configure_ldap': } ->
+    class  { 'fail2ban': } ->
+  anchor { 'end': }
+}
 
-  #package {
-  #  'spampd':
-  #    ensure => 'latest';
-  #}->
-  #file {
-  #  '/etc/default/spamassassin':
-  #    ensure => present,
-  #    owner  => 'root',
-  #    group  => 'root',
-  #    source => "file:///vagrant/puppet/files/spamassassin/default";
-  #}->
-  #service {
-  #  'spampd':
-  #    ensure => running,
-  #    enable => true,
-  #}
-
-
-  include firewall_setup
-  include docker
-
-  class { 'fail2ban': }
-
-  docker::run { 'znc':
-    image              => 'jimeh/znc',
-    memory_limit       => '16m',
-    ports              => ['6667:6667'],
-    volumes            => ['/vagrant/puppet/files/znc/znc.conf:/znc-data/configs/znc.conf:rw'],
-    restart_service    => true,
-  }
+class configure {
 
   docker::image { 'arenstar/opensmtpd':
-    docker_dir => '/vagrant/opensmtpd'
+    docker_dir => '/vagrant/docker/opensmtpd'
   }->
   docker::run { 'opensmtpd':
     image              => 'arenstar/opensmtpd',
     memory_limit       => '64m',
-    ports              => ['25:25','587:587'],
-    hostname           => 'mail.arenstar.net',
-    hostentries        => ['ldap.arenstar.net:172.17.0.1'],
+    ports              => ['25:25','587:587','10024:10024'],
+    hostname           => 'smtp',
     volumes            => [
        '/etc/mailname:/etc/mailname:ro',
        '/vagrant/puppet/files/opensmtpd/smtpd.conf:/etc/smtpd.conf:ro',
@@ -50,11 +34,34 @@ node default {
     restart_service    => true,
   }
 
+  docker::image { 'arenstar/dovecot':
+    docker_dir => '/vagrant/docker/dovecot'
+  }->
+  docker::run { 'dovecot':
+    image              => 'arenstar/dovecot',
+    memory_limit       => '32m',
+    ports              => ['24:24','993:993'],
+    hostname	       => 'dovecot',
+    restart_service    => true,
+    volumes            => [
+       '/vagrant/puppet/files/dovecot/dovecot.conf:/etc/dovecot/dovecot.conf:ro',
+       '/vagrant/puppet/files/dovecot/dovecot-ldap.conf.ext:/etc/dovecot/dovecot-ldap.conf.ext:ro',
+       '/vagrant/puppet/files/dovecot/sa-learn-pipe.sh:/usr/bin/sa-learn-pipe.sh:ro',
+       '/etc/ssl/wildcard_arenstar.net.pem:/etc/pki/ssl_cert.pem:ro',
+       '/etc/ssl/wildcard_arenstar.net.key:/etc/pki/ssl_key.pem:ro',
+    ],
+    env                => [
+       "SERVICE_24_NAME=lmtp",
+       "SERVICE_993_NAME=imaps",
+    ],
+  }
+
   docker::run { 'registrator':
     image              => 'gliderlabs/registrator',
     memory_limit       => '16m',
     net                => 'host',
-    command            => 'consul://localhost:8500',
+    hostname           => 'registrator',
+    command            => "-internal consul://${ipaddress_docker0}:8500",
     volumes            => [
        '/var/run/docker.sock:/tmp/docker.sock:ro',
     ],
@@ -64,34 +71,22 @@ node default {
     image              => 'progrium/consul',
     memory_limit       => '16m',
     ports              => ['8400:8400','8500:8500','8600:53/udp'],
-    hostname           => 'consul.arenstar.net',
-    command            => '-server -bootstrap -ui-dir /ui',
+    hostname           => 'consul',
+    command            => "-server -bootstrap -advertise ${ipaddress_eth0} -log-level debug -ui-dir /ui",
     restart_service    => true,
   }
 
-  docker::run { 'amavis':
-    image              => 'flyhard/amavis',
-    memory_limit       => '16m',
-    ports              => ['10024:10024'],
-    hostentries        => ['consul.arenstar.net:172.17.0.1'],
-    restart_service    => true,
-  }
-
-  docker::image { 'arenstar/dovecot':
-    docker_dir => '/vagrant/dovecot'
+  docker::image { 'arenstar/amavisd':
+    docker_dir => '/vagrant/docker/amavisd'
   }->
-  docker::run { 'dovecot':
-    image              => 'arenstar/dovecot',
-    memory_limit       => '32m',
-    ports              => ['24:24','993:993'],
-    hostentries        => ['ldap.arenstar.net:172.17.0.1'],
+  docker::run { 'amavisd':
+    image              => 'arenstar/amavisd',
+    memory_limit       => '16m',
+    hostname           => 'amavisd',
+    ports              => ['10024:10024'],
     restart_service    => true,
-    volumes            => [
-       '/vagrant/puppet/files/dovecot/dovecot.conf:/etc/dovecot/dovecot.conf:ro',
-       '/vagrant/puppet/files/dovecot/dovecot-ldap.conf.ext:/etc/dovecot/dovecot-ldap.conf.ext:ro',
-       '/vagrant/puppet/files/dovecot/sa-learn-pipe.sh:/usr/bin/sa-learn-pipe.sh:ro',
-       '/etc/pki/wildcard_arenstar.net.pem:/etc/pki/ssl_cert.pem:ro',
-       '/etc/pki/wildcard_arenstar.net.key:/etc/pki/ssl_key.pem:ro',
+    env                => [
+       'SERVICE_10024_NAME=amavisd',
     ],
   }
 
@@ -99,9 +94,10 @@ node default {
     image              => 'osixia/openldap',
     memory_limit       => '32m',
     ports              => ['389:389'],
-    hostname           => 'ldap.arenstar.net',
+    hostname           => 'ldap',
     restart_service    => true,
     env                => [
+       'SERVICE_389_NAME=ldap',
        'LDAP_ORGANISATION=arenstar',
        'LDAP_DOMAIN=arenstar.net',
        'LDAP_ADMIN_PASSWORD=password',
@@ -113,33 +109,43 @@ node default {
     ],
   }
 
-  exec { "ldap-add-users":
-    command => "/usr/bin/ldapadd -x -D 'cn=admin,dc=arenstar,dc=net' -w password -f /vagrant/puppet/files/openldap/add_users/add_users.ldif",
-    unless  => "/usr/bin/ldapsearch -x -D 'cn=admin,dc=arenstar,dc=net' -w password -b \"uid=test,ou=people,dc=arenstar,dc=net\" \"uid=test\"",
+  docker::run { 'znc':
+    image              => 'jimeh/znc',
+    memory_limit       => '16m',
+    hostname           => 'znc',
+    ports              => ['6667:6667'],
+    volumes            => ['/vagrant/puppet/files/znc/znc.conf:/znc-data/configs/znc.conf:rw'],
+    restart_service    => true,
+    env                => [
+       'SERVICE_6667_NAME=znc',
+    ],
   }
-  exec { "ldap-default-policy":
-    command => "/usr/bin/ldapadd -x -D 'cn=admin,dc=arenstar,dc=net' -w password -f /vagrant/puppet/files/openldap/default-policy.ldif",
-    unless  => "/usr/bin/ldapsearch -x -D 'cn=admin,dc=arenstar,dc=net' -w password -b \"cn=default,ou=policies,dc=arenstar,dc=net\" \"cn=default\"",
-  }
-  exec { "ldap-email":
-    command => "/usr/bin/ldapadd -x -D 'cn=admin,dc=arenstar,dc=net' -w password -f /vagrant/puppet/files/openldap/email_setup/email_setup.ldif",
-    unless  => "/usr/bin/ldapsearch -x -D 'cn=admin,dc=arenstar,dc=net' -w password -b \"cn=stuff@arenstar.net,ou=aliases,dc=arenstar,dc=net\" \"cn=stuff@arenstar.net\"",
+
+  package {
+    'exim4': 
+      ensure => absent;
+    'exim4-base':
+      ensure => absent;
+    'exim4-config':
+      ensure => absent;
+    'exim4-daemon-light':
+      ensure => absent;
   }
 
   file {
-    '/etc/pki/wildcard_arenstar.net.key':
+    '/etc/ssl/wildcard_arenstar.net.key':
       ensure => present,
       owner  => 'root',
       group  => 'root',
       mode   => '0600',
       source => "file:///vagrant/pki/wildcard_arenstar.net.key";
-    '/etc/pki/wildcard_arenstar.net.pem':
+    '/etc/ssl/wildcard_arenstar.net.pem':
       ensure => present,
       owner  => 'root',
       group  => 'root',
       mode   => '0600',
       source => "file:///vagrant/pki/wildcard_arenstar.net.pem";
-    '/etc/pki/arenstar_CA_cert.pem':
+    '/etc/ssl/arenstar_CA_cert.pem':
       ensure => present,
       owner  => 'root',
       group  => 'root',
@@ -150,6 +156,26 @@ node default {
       owner   => 'root',
       group   => 'root',
       content => "arenstar.net\n";
+  }
+}
+
+class configure_ldap {
+
+  exec { "ldap-add-users":
+    command => "/usr/bin/ldapadd -x -D 'cn=admin,dc=arenstar,dc=net' -w password -f /vagrant/puppet/files/openldap/add_users/add_users.ldif",
+    unless  => "/usr/bin/ldapsearch -x -D 'cn=admin,dc=arenstar,dc=net' -w password -b \"uid=test,ou=people,dc=arenstar,dc=net\" \"uid=test\"",
+  }
+  exec { "ldap-default-policy":
+    command => "/usr/bin/ldapadd -x -D 'cn=admin,dc=arenstar,dc=net' -w password -f /vagrant/puppet/files/openldap/default-policy.ldif",
+    unless  => "/usr/bin/ldapsearch -x -D 'cn=admin,dc=arenstar,dc=net' -w password -b \"cn=default,ou=policies,dc=arenstar,dc=net\" \"cn=default\"",
+  }
+  exec { "ldap-email-schema":
+    command => "/usr/bin/ldapadd -x -D 'cn=admin,cn=config' -w password -f /vagrant/puppet/files/openldap/email_setup/schema_setup.ldif",
+    unless  => "/usr/bin/ldapsearch -x -D 'cn=admin,cn=config' -w password -b \"cn={14}misc,cn=schema,cn=config\" \"cn={14}misc\" ",
+  }->
+  exec { "ldap-email":
+    command => "/usr/bin/ldapadd -x -D 'cn=admin,dc=arenstar,dc=net' -w password -f /vagrant/puppet/files/openldap/email_setup/email_setup.ldif",
+    unless  => "/usr/bin/ldapsearch -x -D 'cn=admin,dc=arenstar,dc=net' -w password -b \"cn=contact@arenstar.net,ou=aliases,dc=arenstar,dc=net\" \"cn=contact@arenstar.net\"",
   }
 }
 
