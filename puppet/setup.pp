@@ -45,7 +45,7 @@ class configure {
   docker::run { 'amavisd':
     image              => 'arenstar/amavisd',
     memory_limit       => '32m',
-    hostname           => 'amavisd',
+    hostname           => 'amavisd.arenstar.net',
     ports              => ['10024:10024'],
     restart_service    => true,
     env                => [

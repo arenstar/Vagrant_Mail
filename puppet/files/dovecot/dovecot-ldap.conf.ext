@@ -1,4 +1,4 @@
-uris = ldap://ldap.arenstar.net
+uris = ldap://ldap.service.consul
 dn = cn=admin,dc=arenstar,dc=net
 dnpass = password
 tls = no
