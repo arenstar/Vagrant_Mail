@@ -4,7 +4,7 @@ node default {
         ensure         => 'present',
         service_enable => 'true',
         service_state  => 'running',
-        dns            => ["S{ipaddress_docker0}",'8.8.8.8'],
+        dns            => ["${ipaddress_docker0}",'8.8.8.8'],
         dns_search     => 'services.consul',
     }->
     class  { 'firewall_setup': } ->
@@ -86,7 +86,7 @@ class configure {
   }->
   docker::run { 'amavisd':
     image              => 'arenstar/amavisd',
-    memory_limit       => '16m',
+    memory_limit       => '32m',
     hostname           => 'amavisd',
     ports              => ['10024:10024'],
     restart_service    => true,
