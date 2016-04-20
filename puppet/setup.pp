@@ -23,7 +23,7 @@ class configure {
     image              => 'arenstar/opensmtpd',
     memory_limit       => '64m',
     restart_service    => true,
-    ports              => ['25:25','587:587','10024:10024'],
+    ports              => ['25:25','587:587','10025:10025'],
     hostname           => 'smtp',
     env                => [
        "SERVICE_25_NAME=smtp",
