@@ -24,12 +24,17 @@ class configure {
     memory_limit       => '64m',
     ports              => ['25:25','587:587','10024:10024'],
     hostname           => 'smtp',
+    env                => [
+       "SERVICE_25_NAME=smtp",
+       "SERVICE_587_NAME=smtps",
+       "SERVICE_10024_NAME=filtered",
+    ],
     volumes            => [
        '/etc/mailname:/etc/mailname:ro',
        '/vagrant/puppet/files/opensmtpd/smtpd.conf:/etc/smtpd.conf:ro',
        '/vagrant/puppet/files/opensmtpd/smtpd-ldap.conf:/etc/smtpd-ldap.conf:ro',
-       '/etc/pki/wildcard_arenstar.net.pem:/etc/wildcard_arenstar.net.pem:ro',
-       '/etc/pki/wildcard_arenstar.net.key:/etc/wildcard_arenstar.net.key:ro',
+       '/etc/ssl/wildcard_arenstar.net.pem:/etc/wildcard_arenstar.net.pem:ro',
+       '/etc/ssl/wildcard_arenstar.net.key:/etc/wildcard_arenstar.net.key:ro',
     ],
     restart_service    => true,
   }
