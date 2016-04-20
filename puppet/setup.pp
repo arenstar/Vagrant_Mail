@@ -5,7 +5,7 @@ node default {
         service_enable => 'true',
         service_state  => 'running',
         dns            => ["${ipaddress_docker0}",'8.8.8.8'],
-        dns_search     => 'services.consul',
+        dns_search     => 'service.consul',
     }->
     class  { 'firewall_setup': } ->
     class  { 'configure': } ->
@@ -22,6 +22,7 @@ class configure {
   docker::run { 'opensmtpd':
     image              => 'arenstar/opensmtpd',
     memory_limit       => '64m',
+    restart_service    => true,
     ports              => ['25:25','587:587','10024:10024'],
     hostname           => 'smtp',
     env                => [
@@ -36,7 +37,6 @@ class configure {
        '/etc/ssl/wildcard_arenstar.net.pem:/etc/wildcard_arenstar.net.pem:ro',
        '/etc/ssl/wildcard_arenstar.net.key:/etc/wildcard_arenstar.net.key:ro',
     ],
-    restart_service    => true,
   }
 
   docker::image { 'arenstar/dovecot':
@@ -75,7 +75,7 @@ class configure {
   docker::run { 'consul':
     image              => 'progrium/consul',
     memory_limit       => '16m',
-    ports              => ['8400:8400','8500:8500','8600:53/udp'],
+    ports              => ['8400:8400','8500:8500',"${ipaddress_docker0}:53:53/udp"],
     hostname           => 'consul',
     command            => "-server -bootstrap -advertise ${ipaddress_eth0} -log-level debug -ui-dir /ui",
     restart_service    => true,
