@@ -39,6 +39,20 @@ class configure {
     ],
   }
 
+  docker::image { 'arenstar/amavisd':
+    docker_dir => '/vagrant/docker/amavisd'
+  }->
+  docker::run { 'amavisd':
+    image              => 'arenstar/amavisd',
+    memory_limit       => '32m',
+    hostname           => 'amavisd',
+    ports              => ['10024:10024'],
+    restart_service    => true,
+    env                => [
+       'SERVICE_10024_NAME=amavisd',
+    ],
+  }
+
   docker::image { 'arenstar/dovecot':
     docker_dir => '/vagrant/docker/dovecot'
   }->
@@ -79,20 +93,6 @@ class configure {
     hostname           => 'consul',
     command            => "-server -bootstrap -advertise ${ipaddress_eth0} -log-level debug -ui-dir /ui",
     restart_service    => true,
-  }
-
-  docker::image { 'arenstar/amavisd':
-    docker_dir => '/vagrant/docker/amavisd'
-  }->
-  docker::run { 'amavisd':
-    image              => 'arenstar/amavisd',
-    memory_limit       => '32m',
-    hostname           => 'amavisd',
-    ports              => ['10024:10024'],
-    restart_service    => true,
-    env                => [
-       'SERVICE_10024_NAME=amavisd',
-    ],
   }
 
   docker::run { 'openldap':
